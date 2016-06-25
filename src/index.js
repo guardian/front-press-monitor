@@ -9,12 +9,12 @@ const COMMERCIAL_STALE = [3, 'hours'];
 export function handler (events, context, callback) {
 	const lambda = new AWS.Lambda();
 	const cmsfronts = new Client({
-		bucket: config.buckets.cmsfronts,
+		bucket: config.buckets.cmsfronts.name,
 		env: 'PROD',
 		configKey: config.buckets.config
 	});
 	const frontend = new Client({
-		bucket: config.buckets.frontend,
+		bucket: config.buckets.frontend.name,
 		env: 'PROD',
 		pressedPrefix: 'frontsapi/pressed'
 	});
