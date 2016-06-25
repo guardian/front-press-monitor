@@ -1,0 +1,30 @@
+defaultStacks:
+    - cms-fronts
+packages:
+    pressMonitor:
+        type: aws-s3
+        data:
+            bucket: lambda-boilerplate-dist
+            cacheControl: "public, max-age=315360000"
+            prefixPackage: true
+            prefixStack: false
+            prefixStage: false
+            publicReadAcl: false
+    lambda:
+        type: aws-lambda
+        data:
+            functions:
+                PROD:
+                    name: front-press-monitor-Lambda-GY9Z0NCGNH9X
+                    filename: artifact.zip
+recipes:
+    upload:
+        actionsBeforeApp:
+            - pressMonitor.uploadStaticFiles
+    lambda:
+        actionsBeforeApp:
+            - lambda.updateLambda
+    default:
+        depends:
+            - upload
+            - lambda

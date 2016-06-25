@@ -1,0 +1,114 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Monitor the scheduled pressing of fronts
+Parameters:
+    Stack:
+        Description: Stack name
+        Type: String
+        Default: cms-fronts
+    App:
+        Description: Application name
+        Type: String
+        Default: front-press-monitor
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - PROD
+        Default: PROD
+    DeployBucket:
+        Description: Bucket where RiffRaff uploads artifacts on deploy
+        Type: String
+    CMSFrontsBucket:
+        Description: Bucket containing the fronts configuration
+        Type: String
+    FrontendBucket:
+        Description: Bucket containing pressed files
+        Type: String
+Resources:
+    ExecutionRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                        Service:
+                            - lambda.amazonaws.com
+                      Action: "sts:AssumeRole"
+            Path: /
+            Policies:
+                - PolicyName: logs
+                  PolicyDocument:
+                    Statement:
+                        Effect: Allow
+                        Action:
+                            - "logs:CreateLogGroup"
+                            - "logs:CreateLogStream"
+                            - "logs:PutLogEvents"
+                        Resource: "arn:aws:logs:*:*:*"
+                - PolicyName: lambda
+                  PolicyDocument:
+                    Statement:
+                        Effect: Allow
+                        Action:
+                            - "lambda:InvokeFunction"
+                        Resource: "*"
+                - PolicyName: bucket
+                  PolicyDocument:
+                    Statement:
+                        Effect: Allow
+                        Action:
+                            - "s3:GetObject"
+                        Resource:
+                            - Fn::Join:
+                                    - ""
+                                    - - "arn:aws:s3:::"
+                                      - Ref: CMSFrontsBucket
+                                      - "/*"
+                            - Fn::Join:
+                                    - ""
+                                    - - "arn:aws:s3:::"
+                                      - Ref: FrontendBucket
+                                      - "/*"
+    Lambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Code:
+                S3Bucket:
+                    Ref: DeployBucket
+                S3Key:
+                    "Fn::Join":
+                        - "/"
+                        -
+                            - pressMonitor
+                            - artifact.zip
+            Description: Monitor admin press
+            Handler: index.handler
+            MemorySize: 128
+            Role:
+                "Fn::GetAtt": ["ExecutionRole", "Arn"]
+            Runtime: nodejs4.3
+            Timeout: 60
+    EventSource:
+        Type: AWS::Events::Rule
+        Properties:
+            Description: Schedule the lambda
+            ScheduleExpression: rate(30 minutes)
+            State: ENABLED
+            Targets:
+                - Arn:
+                    Fn::GetAtt:
+                        - Lambda
+                        - Arn
+                  Id: Lambda
+    LambdaPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            FunctionName:
+                Ref: Lambda
+            Action: lambda:InvokeFunction
+            Principal: events.amazonaws.com
+            SourceArn:
+                Fn::GetAtt:
+                    - EventSource
+                    - Arn
