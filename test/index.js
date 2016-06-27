@@ -10,7 +10,60 @@ const collectionJson = {
 	},
 	collections: {}
 };
-const silentLogger = { log () {} };
+const silentLogger = { log () {}, error () {} };
+const frontendPressStale = (function (now) {
+	const oneHourAgo = new Date(now.getTime());
+	oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+	return {
+		options: { pressedTable: 'table' },
+		AWS: {
+			batchGetItem (obj, cb) {
+				cb(null, {
+					Responses: {
+						table: [{
+							frontId: { S: 'one' },
+							pressedTime: { S: oneHourAgo.toString() }
+						},
+						// two was never pressed
+						{
+							frontId: { S: 'apple' },
+							pressedTime: { S: (new Date()).toString() }
+						}, {
+							frontId: { S: 'pear' },
+							pressedTime: { S: (new Date()).toString() }
+						}]
+					}
+				});
+			}
+		}
+	};
+})(new Date());
+const frontendPressRecent = (function () {
+	return {
+		options: { pressedTable: 'table' },
+		AWS: {
+			batchGetItem (obj, cb) {
+				cb(null, {
+					Responses: {
+						table: [{
+							frontId: { S: 'one' },
+							pressedTime: { S: (new Date()).toString() }
+						}, {
+							frontId: { S: 'two' },
+							pressedTime: { S: (new Date()).toString() }
+						}, {
+							frontId: { S: 'apple' },
+							pressedTime: { S: (new Date()).toString() }
+						}, {
+							frontId: { S: 'pear' },
+							pressedTime: { S: (new Date()).toString() }
+						}]
+					}
+				});
+			}
+		}
+	};
+})(new Date());
 
 tap.test('fails if the config is not available', test => {
 	test.plan(2);
@@ -43,10 +96,10 @@ tap.test('fails if the pressed json are not available', test => {
 		}
 	};
 	const frontend = {
-		options: {},
+		options: { pressedTable: 'table' },
 		AWS: {
-			headObject (obj, cb) {
-				cb(new Error('Invalid press'));
+			batchGetItem (obj, cb) {
+				cb(new Error('Invalid dynamo'));
 			}
 		}
 	};
@@ -54,7 +107,7 @@ tap.test('fails if the pressed json are not available', test => {
 	return lambda({cmsfronts, frontend, logger: silentLogger})
 	.catch(error => {
 		test.type(error, Error);
-		test.match(error.message, /invalid press/i);
+		test.match(error.message, /invalid dynamo/i);
 	});
 });
 
@@ -67,16 +120,8 @@ tap.test('does nothing when all fronts are pressed recently', test => {
 			}
 		}
 	};
-	const frontend = {
-		options: {},
-		AWS: {
-			headObject (obj, cb) {
-				cb(null, { LastModified: (new Date()).toString() });
-			}
-		}
-	};
 
-	return lambda({cmsfronts, frontend, logger: silentLogger})
+	return lambda({cmsfronts, frontend: frontendPressRecent, logger: silentLogger})
 	.then(result => {
 		test.deepEqual(result, {
 			checked: 4,
@@ -94,28 +139,18 @@ tap.test('alert if some fronts are stale', test => {
 			}
 		}
 	};
-	const oneHourAgo = new Date();
-	oneHourAgo.setHours(oneHourAgo.getHours() - 1);
-	const frontend = {
-		options: {},
-		AWS: {
-			headObject (obj, cb) {
-				cb(null, { LastModified: oneHourAgo.toString() });
-			}
-		}
-	};
 	const email = {
 		invoke (request, cb) {
 			const payload = JSON.parse(request.Payload).env;
 			test.equal(payload.checked, 4, 'checked');
 			test.equal(payload.stale, 2, 'stale');
-			test.ok(['one', 'two'].indexOf(payload.list[0].front) !== -1, 'first front name ' + payload.list[0].front);
-			test.ok(['one', 'two'].indexOf(payload.list[1].front) !== -1, 'second front name ' + payload.list[1].front);
+			test.ok(['one', 'two'].indexOf(payload.list[0]) !== -1, 'first front name ' + payload.list[0]);
+			test.ok(['one', 'two'].indexOf(payload.list[1]) !== -1, 'second front name ' + payload.list[1]);
 			cb();
 		}
 	};
 
-	return lambda({cmsfronts, frontend, lambda: email, logger: silentLogger})
+	return lambda({cmsfronts, frontend: frontendPressStale, lambda: email, logger: silentLogger})
 	.then(result => {
 		test.deepEqual(result, {
 			checked: 4,
@@ -134,16 +169,6 @@ tap.test('fails if email sending does not work', test => {
 			}
 		}
 	};
-	const oneHourAgo = new Date();
-	oneHourAgo.setHours(oneHourAgo.getHours() - 1);
-	const frontend = {
-		options: {},
-		AWS: {
-			headObject (obj, cb) {
-				cb(null, { LastModified: oneHourAgo.toString() });
-			}
-		}
-	};
 	const email = {
 		invoke (request, cb) {
 			const payload = JSON.parse(request.Payload).env;
@@ -153,7 +178,7 @@ tap.test('fails if email sending does not work', test => {
 		}
 	};
 
-	return lambda({cmsfronts, frontend, lambda: email, logger: silentLogger})
+	return lambda({cmsfronts, frontend: frontendPressStale, lambda: email, logger: silentLogger})
 	.catch(error => {
 		test.type(error, Error);
 		test.match(error.message, /invalid email/i);

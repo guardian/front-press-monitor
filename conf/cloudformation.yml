@@ -21,8 +21,8 @@ Parameters:
     CMSFrontsBucket:
         Description: Bucket containing the fronts configuration
         Type: String
-    FrontendBucket:
-        Description: Bucket containing pressed files
+    DynamoTable:
+        Description: Table with the last pressed information
         Type: String
 Resources:
     ExecutionRole:
@@ -65,11 +65,21 @@ Resources:
                                     - - "arn:aws:s3:::"
                                       - Ref: CMSFrontsBucket
                                       - "/*"
+                - PolicyName: table
+                  PolicyDocument:
+                    Statement:
+                        Effect: Allow
+                        Action:
+                            - "dynamodb:BatchGetItem"
+                        Resource:
                             - Fn::Join:
                                     - ""
-                                    - - "arn:aws:s3:::"
-                                      - Ref: FrontendBucket
-                                      - "/*"
+                                    - - "arn:aws:dynamodb:"
+                                      - Ref: AWS::Region
+                                      - ":"
+                                      - Ref: AWS::AccountId
+                                      - ":table/"
+                                      - Ref: DynamoTable
     Lambda:
         Type: AWS::Lambda::Function
         Properties:

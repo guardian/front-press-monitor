@@ -16,14 +16,8 @@ export function handler (events, context, callback) {
 	const frontend = new Client({
 		bucket: config.buckets.frontend.name,
 		env: 'PROD',
-		pressedPrefix: 'frontsapi/pressed'
+		pressedTable: config.facia.PROD.dynamo
 	});
-	const providerChain = new AWS.CredentialProviderChain();
-	providerChain.providers.splice(0, 0, new AWS.SharedIniFileCredentials({profile: 'frontend'}));
-	frontend.AWS.setS3(new AWS.S3({
-		credentials: null,
-		credentialProvider: providerChain
-	}));
 
 	handleEvents({cmsfronts, frontend, lambda})
 	.then(() => callback())
@@ -36,14 +30,11 @@ export default function handleEvents ({cmsfronts, frontend, lambda, logger = con
 			...pickRandom(2)(config.listFrontsIds('editorial')).map(front => staleIfBefore(front, EDITORIAL_STALE)),
 			...pickRandom(2)(config.listFrontsIds('commercial')).map(front => staleIfBefore(front, COMMERCIAL_STALE))
 		];
-		logger.log('Checking', checkThese);
-		return Promise.all(checkThese.map(item =>
-			Press(frontend).getLastModified(item.front, 'live').then(date => {
-				item.date = date;
-				return item;
-			})
-		))
-		.then(list => alertOnStale(list, lambda));
+		logger.log('Checking at', new Date(), checkThese);
+
+		return Press(frontend)
+		.batchGetLastModified(...checkThese.map(item => [item.front, 'live']))
+		.then(frontsMap => alertOnStale(checkThese, frontsMap, lambda, logger));
 	});
 }
 
@@ -64,15 +55,20 @@ I've checked {{ checked }} fronts and {{ stale }} appear stale.<br>
 Best regards
 `;
 
-function alertOnStale (list, lambda) {
-	const stale = list.filter(item => isBefore(item.date, item.cutoff));
+function alertOnStale (list, frontsMap, lambda, logger) {
+	const stale = list.filter(item => {
+		const date = frontsMap[item.front];
+		return !date || isBefore(date, item.cutoff);
+	});
 	const result = {
 		checked: list.length,
 		stale: stale.length
 	};
+	logger.log('Stale result', frontsMap, result, stale);
 
 	if (result.stale) {
 		return new Promise((resolve, reject) => {
+			logger.log('Sending email');
 			lambda.invoke({
 				FunctionName: config.email.lambda,
 				InvocationType: 'RequestResponse',
@@ -82,14 +78,16 @@ function alertOnStale (list, lambda) {
 					subject: 'Stale fronts',
 					template: STALE_TEMPLATE,
 					env: Object.assign({
-						list: stale,
+						list: stale.map(item => item.front),
 						faciaPath: config.facia.PROD.path
 					}, result)
 				})
 			}, err => {
 				if (err) {
+					logger.error('Error sending email', err.message);
 					reject(err);
 				} else {
+					logger.log('Email sent');
 					resolve(result);
 				}
 			});
