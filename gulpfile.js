@@ -45,37 +45,22 @@ gulp.task('lint-dev', ['lint'], function () {
 });
 
 gulp.task('riffraff-deploy', function () {
-	return gulp.src(DEPLOY_SOURCE)
-		.pipe(yaml({ space: 4 }))
-		.pipe(gulp.dest('tmp/riffraff'));
+    return gulp.src(DEPLOY_SOURCE)
+        .pipe(yaml({ space: 4 }))
+        .pipe(gulp.dest('tmp/riffraff'));
 });
 
 gulp.task('riffraff-deploy-dev', ['riffraff-deploy'], function () {
-	gulp.watch(DEPLOY_SOURCE, ['riffraff-deploy']);
+    gulp.watch(DEPLOY_SOURCE, ['riffraff-deploy']);
 });
 
 
 gulp.task('dev', ['lint-dev', 'cloudformation-dev', 'compile-dev', 'riffraff-deploy-dev']);
 
-gulp.task('archive', ['compile', 'riffraff-deploy'], function () {
-	return gulp.src('tmp/lambda/**/*')
-		.pipe(zip('artifact.zip'))
-		.pipe(gulp.dest('tmp/riffraff/packages/lambda'))
-		.pipe(gulp.dest('tmp/riffraff/packages/pressMonitor'));
-});
-
-gulp.task('package', ['archive'], function () {
-	return gulp.src('tmp/riffraff/**/*')
-		.pipe(zip('artifacts.zip'))
-		.pipe(gulp.dest('tmp/'));
-});
-
-gulp.task('deploy', ['package'], function (cb) {
+gulp.task('deploy', ['compile'], function (cb) {
 	riffraff.settings.leadDir = path.join(__dirname, 'tmp/');
 
-	riffraff.s3Upload().then(function () {
-		cb();
-	}).catch(function (error) {
-		cb(error);
-	});
+	riffraff.s3FilesUpload()
+	.then(cb)
+	.catch(cb)
 });
