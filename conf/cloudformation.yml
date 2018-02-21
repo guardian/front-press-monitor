@@ -86,12 +86,7 @@ Resources:
             Code:
                 S3Bucket:
                     Ref: DeployBucket
-                S3Key:
-                    "Fn::Join":
-                        - "/"
-                        -
-                            - pressMonitor
-                            - artifact.zip
+                S3Key: 'front-press-monitor/front-press-monitor.zip'
             Description: Monitor admin press
             Handler: index.handler
             MemorySize: 128
