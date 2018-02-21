@@ -6,7 +6,7 @@ deployments:
     type: aws-lambda
     contentDirectory: front-press-monitor
     parameters:
-      bucket: lambda-boilerplate-dist
+      bucket: facia-dist
       functions:
         PROD:
           name: front-press-monitor-Lambda-GY9Z0NCGNH9X
