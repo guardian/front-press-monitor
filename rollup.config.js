@@ -1,10 +1,10 @@
-import nodeResolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
-import babel from 'rollup-plugin-babel';
-import json from 'rollup-plugin-json';
+import nodeResolve from "rollup-plugin-node-resolve";
+import commonjs from "rollup-plugin-commonjs";
+import babel from "rollup-plugin-babel";
+import json from "rollup-plugin-json";
 
 export default {
-	entry: 'src/index.js',
+	entry: "src/index.js",
 	plugins: [
 		json(),
 		babel(),
@@ -13,7 +13,7 @@ export default {
 		}),
 		commonjs()
 	],
-	format: 'cjs',
-	dest: 'tmp/lambda/index.js',
-	external: ['aws-sdk']
+	format: "cjs",
+	dest: "dest/index.js",
+	external: ["aws-sdk"]
 };

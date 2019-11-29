@@ -12,13 +12,16 @@
   "riffraffFile": "./conf/riff-raff.yaml",
   "main": "src/index.js",
   "scripts": {
+    "build": "rollup -c rollup.config.js",
     "pretest": "npm run secrets",
-    "posttest": "gulp lint",
-    "test": "gulp compile && tap test",
-    "secrets": "mkdir -p tmp && ./bin/get-secrets.sh aws-front-pressed-lambda-dist > tmp/config.json",
+    "posttest": "yarn lint",
+    "lint": "eslint src/*.js test/*.js",
+    "test": "tap test",
+    "secrets": "mkdir -p tmp && ./bin/get-secrets.sh $FRONT_PRESSED_LAMBDA_BUCKET > tmp/config.json",
     "deploy": "gulp deploy && VERBOSE=true ARTEFACT_PATH=$PWD riffraff-artefact"
   },
   "devDependencies": {
+    "@guardian/node-riffraff-artifact": "^0.0.17",
     "aws-sdk": "^2.4.2",
     "babel-preset-es2015-rollup": "^1.1.1",
     "exec-chainable": "0.0.3",

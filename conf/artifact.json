@@ -1,0 +1,11 @@
+{
+	"projectName": "cms-fronts::front-press-monitor",
+	"vcsURL": "https://github.com/guardian/front-press-monitor",
+	"actions": [
+		{
+			"action": "front-press-monitor",
+			"path": "../tmp/lambda",
+			"compress": "zip"
+		}
+	]
+}

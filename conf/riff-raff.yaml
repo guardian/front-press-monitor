@@ -2,12 +2,12 @@ regions: [eu-west-1]
 stacks: [cms-fronts]
 
 deployments:
-  front-press-monitor:
-    type: aws-lambda
-    contentDirectory: front-press-monitor
-    parameters:
-      bucket: facia-dist
-      functions:
-        PROD:
-          name: front-press-monitor-Lambda-GY9Z0NCGNH9X
-          filename: front-press-monitor.zip
+    front-press-monitor:
+        type: aws-lambda
+        contentDirectory: front-press-monitor
+        parameters:
+            bucket: facia-dist
+            functions:
+                PROD:
+                    name: front-press-monitor-Lambda-GY9Z0NCGNH9X
+                    filename: front-press-monitor.zip
