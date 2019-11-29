@@ -4,6 +4,8 @@ var s3 = new AWS.S3();
 
 var bucket = process.argv[2];
 
+console.log(JSON.stringify(bucket.split("")))
+
 s3.getObject({
 	Bucket: bucket,
 	Key: 'config.json'
