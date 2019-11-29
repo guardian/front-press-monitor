@@ -6,7 +6,7 @@
   "version": "1.0.0",
   "private": true,
   "license": "Apache-2.0",
-  "cloudformation": false ,
+  "cloudformation": false,
   "buildDir": "tmp/lambda",
   "isAwsLambda": true,
   "riffraffFile": "./conf/riff-raff.yaml",
@@ -15,8 +15,8 @@
     "pretest": "npm run secrets",
     "posttest": "gulp lint",
     "test": "gulp compile && tap test",
-    "secrets": "mkdir -p tmp && ./bin/get-secrets.sh $FRONT_PRESSED_LAMBDA_BUCKET > tmp/config.json",
-     "deploy": "gulp deploy && VERBOSE=true ARTEFACT_PATH=$PWD riffraff-artefact"
+    "secrets": "./bin/get-secrets.sh $FRONT_PRESSED_LAMBDA_BUCKET",
+    "deploy": "gulp deploy && VERBOSE=true ARTEFACT_PATH=$PWD riffraff-artefact"
   },
   "devDependencies": {
     "aws-sdk": "^2.4.2",
