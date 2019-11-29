@@ -1,5 +1,5 @@
 const tap = require('tap');
-const lambda = require('../tmp/lambda/index').default;
+const lambda = require('../dist/index').default;
 
 const collectionJson = {
 	fronts: {
