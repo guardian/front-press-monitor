@@ -2,10 +2,8 @@
 var AWS = require('aws-sdk');
 var s3 = new AWS.S3();
 
-var bucket = process.argv[2];
-
 s3.getObject({
-	Bucket: bucket,
+	Bucket: 'aws-front-pressed-lambda-dist',
 	Key: 'config.json'
 }, function (err, data) {
 	if (err) {
