@@ -1,3 +1,3 @@
-npm i
-npm run test
-npm run deploy
+yarn i
+yarn test
+yarn deploy
