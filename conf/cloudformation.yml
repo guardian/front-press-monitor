@@ -86,7 +86,9 @@ Resources:
             Code:
                 S3Bucket:
                     Ref: DeployBucket
-                S3Key: "front-press-monitor/front-press-monitor.zip"
+                S3Key: !Sub
+                    - cms-fronts/${Stage}/front-press-monitor/front-press-monitor.zip
+                    - { Stage: !Ref Stage }
             Description: Monitor admin press
             Handler: index.handler
             MemorySize: 128
