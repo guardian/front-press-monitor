@@ -1,16 +1,24 @@
-import AWS from 'aws-sdk';
-import {Client, Config, Press} from 'aws-s3-facia-tool';
+import AWS, { CredentialProviderChain, SharedIniFileCredentials } from 'aws-sdk';
+import { Client, Config, Press } from 'aws-s3-facia-tool';
 import { subtract, isBefore } from 'compare-dates';
 
 const EDITORIAL_STALE = [30, 'minutes'];
 const COMMERCIAL_STALE = [3, 'hours'];
 
+const credentialProvider = new CredentialProviderChain([
+    () => new SharedIniFileCredentials({ profile: 'cmsFronts' }),
+    ...CredentialProviderChain.defaultProviders
+  ]);
+
+const ssm = new AWS.SSM({ region: 'eu-west-1', credentialProvider });
+
 export function handler (events, context, callback) {
 	const lambda = new AWS.Lambda();
-	const ssm = new AWS.SSM();
 
 	// The environment is hard-coded, as we don't require these alerts in CODE.
-	ssm.getParameter('/front-press-monitor/PROD/config').promise().then(jsonConfig => {
+	ssm.getParameter({ Name: '/front-press-monitor/PROD/config' }).promise().then(({ Parameter: { Value: stringConfig }}) => {
+		const jsonConfig = JSON.parse(stringConfig);
+
 		const cmsfronts = new Client({
 			bucket: jsonConfig.buckets.cmsfronts.name,
 			env: 'PROD',
