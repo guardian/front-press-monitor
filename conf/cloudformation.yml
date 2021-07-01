@@ -53,6 +53,13 @@ Resources:
                           Action:
                               - "lambda:InvokeFunction"
                           Resource: "*"
+                - PolicyName: params
+                  PolicyDocument:
+                      Statement:
+                          Effect: Allow
+                          Action:
+                              - "ssm:GetParameter*"
+                          Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/front-press-monitor/*"
                 - PolicyName: bucket
                   PolicyDocument:
                       Statement:
