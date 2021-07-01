@@ -8,20 +8,25 @@ const COMMERCIAL_STALE = [3, 'hours'];
 
 export function handler (events, context, callback) {
 	const lambda = new AWS.Lambda();
-	const cmsfronts = new Client({
-		bucket: config.buckets.cmsfronts.name,
-		env: 'PROD',
-		configKey: config.buckets.config
-	});
-	const frontend = new Client({
-		bucket: config.buckets.frontend.name,
-		env: 'PROD',
-		pressedTable: config.facia.PROD.dynamo
-	});
+	const ssm = new AWS.SSM();
+	ssm.getParameter('/front-press-monitor/PROD/config').promise.then(config => {
+		const cmsfronts = new Client({
+			bucket: config.buckets.cmsfronts.name,
+			env: 'PROD',
+			configKey: config.buckets.config
+		});
+		const frontend = new Client({
+			bucket: config.buckets.frontend.name,
+			env: 'PROD',
+			pressedTable: config.facia.PROD.dynamo
+		});
 
-	handleEvents({cmsfronts, frontend, lambda})
-	.then(() => callback())
-	.catch(callback);
+		return { cmsfronts, frontend };
+	}).then(({ cmsfronts, frontend }) => {
+		handleEvents({cmsfronts, frontend, lambda})
+			.then(() => callback())
+			.catch(callback);
+	});
 }
 
 export default function handleEvents ({cmsfronts, frontend, lambda, logger = console}) {
