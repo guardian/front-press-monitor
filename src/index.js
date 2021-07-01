@@ -1,5 +1,4 @@
 import AWS from 'aws-sdk';
-import config from '../tmp/config.json';
 import {Client, Config, Press} from 'aws-s3-facia-tool';
 import { subtract, isBefore } from 'compare-dates';
 
@@ -11,27 +10,27 @@ export function handler (events, context, callback) {
 	const ssm = new AWS.SSM();
 
 	// The environment is hard-coded, as we don't require these alerts in CODE.
-	ssm.getParameter('/front-press-monitor/PROD/config').promise.then(config => {
+	ssm.getParameter('/front-press-monitor/PROD/config').promise.then(jsonConfig => {
 		const cmsfronts = new Client({
-			bucket: config.buckets.cmsfronts.name,
+			bucket: jsonConfig.buckets.cmsfronts.name,
 			env: 'PROD',
-			configKey: config.buckets.config
+			configKey: jsonConfig.buckets.config
 		});
 		const frontend = new Client({
-			bucket: config.buckets.frontend.name,
+			bucket: jsonConfig.buckets.frontend.name,
 			env: 'PROD',
-			pressedTable: config.facia.PROD.dynamo
+			pressedTable: jsonConfig.facia.PROD.dynamo
 		});
 
-		return { cmsfronts, frontend };
-	}).then(({ cmsfronts, frontend }) => {
-		handleEvents({cmsfronts, frontend, lambda})
+		return { cmsfronts, frontend, jsonConfig };
+	}).then(({ cmsfronts, frontend, jsonConfig }) => {
+		handleEvents({cmsfronts, frontend, lambda, jsonConfig})
 			.then(() => callback())
 			.catch(callback);
 	});
 }
 
-export default function handleEvents ({cmsfronts, frontend, lambda, logger = console}) {
+export default function handleEvents ({cmsfronts, frontend, lambda, jsonConfig, logger = console}) {
 	return Config(cmsfronts).fetch().then(config => {
 		const checkThese = [
 			...pickRandom(2)(config.listFrontsIds('editorial')).map(front => staleIfBefore(front, EDITORIAL_STALE)),
@@ -41,7 +40,7 @@ export default function handleEvents ({cmsfronts, frontend, lambda, logger = con
 
 		return Press(frontend)
 		.batchGetLastModified(...checkThese.map(item => [item.front, 'live']))
-		.then(frontsMap => alertOnStale(checkThese, frontsMap, lambda, logger));
+		.then(frontsMap => alertOnStale(checkThese, frontsMap, lambda, logger, jsonConfig));
 	});
 }
 
@@ -62,7 +61,7 @@ I've checked {{ checked }} fronts and {{ stale }} appear stale.<br>
 Best regards
 `;
 
-function alertOnStale (list, frontsMap, lambda, logger) {
+function alertOnStale (list, frontsMap, lambda, logger, jsonConfig) {
 	const stale = list.filter(item => {
 		const date = frontsMap[item.front];
 		return !date || isBefore(date, item.cutoff);
@@ -77,16 +76,16 @@ function alertOnStale (list, frontsMap, lambda, logger) {
 		return new Promise((resolve, reject) => {
 			logger.log('Sending email');
 			lambda.invoke({
-				FunctionName: config.email.lambda,
+				FunctionName: jsonConfig.email.lambda,
 				InvocationType: 'RequestResponse',
 				Payload: JSON.stringify({
-					from: config.email.from,
-					to: config.email.to,
+					from: jsonConfig.email.from,
+					to: jsonConfig.email.to,
 					subject: 'Stale fronts',
 					template: STALE_TEMPLATE,
 					env: Object.assign({
 						list: stale.map(item => item.front),
-						faciaPath: config.facia.PROD.path
+						faciaPath: jsonConfig.facia.PROD.path
 					}, result)
 				})
 			}, err => {
