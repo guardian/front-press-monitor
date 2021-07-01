@@ -9,6 +9,8 @@ const COMMERCIAL_STALE = [3, 'hours'];
 export function handler (events, context, callback) {
 	const lambda = new AWS.Lambda();
 	const ssm = new AWS.SSM();
+
+	// The environment is hard-coded, as we don't require these alerts in CODE.
 	ssm.getParameter('/front-press-monitor/PROD/config').promise.then(config => {
 		const cmsfronts = new Client({
 			bucket: config.buckets.cmsfronts.name,
