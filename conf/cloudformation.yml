@@ -32,47 +32,54 @@ Resources:
                 Statement:
                     - Effect: Allow
                       Principal:
-                        Service:
-                            - lambda.amazonaws.com
+                          Service:
+                              - lambda.amazonaws.com
                       Action: "sts:AssumeRole"
             Path: /
             Policies:
                 - PolicyName: logs
                   PolicyDocument:
-                    Statement:
-                        Effect: Allow
-                        Action:
-                            - "logs:CreateLogGroup"
-                            - "logs:CreateLogStream"
-                            - "logs:PutLogEvents"
-                        Resource: "arn:aws:logs:*:*:*"
+                      Statement:
+                          Effect: Allow
+                          Action:
+                              - "logs:CreateLogGroup"
+                              - "logs:CreateLogStream"
+                              - "logs:PutLogEvents"
+                          Resource: "arn:aws:logs:*:*:*"
                 - PolicyName: lambda
                   PolicyDocument:
-                    Statement:
-                        Effect: Allow
-                        Action:
-                            - "lambda:InvokeFunction"
-                        Resource: "*"
+                      Statement:
+                          Effect: Allow
+                          Action:
+                              - "lambda:InvokeFunction"
+                          Resource: "*"
+                - PolicyName: params
+                  PolicyDocument:
+                      Statement:
+                          Effect: Allow
+                          Action:
+                              - "ssm:GetParameter*"
+                          Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/front-press-monitor/*"
                 - PolicyName: bucket
                   PolicyDocument:
-                    Statement:
-                        Effect: Allow
-                        Action:
-                            - "s3:GetObject"
-                        Resource:
-                            - Fn::Join:
+                      Statement:
+                          Effect: Allow
+                          Action:
+                              - "s3:GetObject"
+                          Resource:
+                              - Fn::Join:
                                     - ""
                                     - - "arn:aws:s3:::"
                                       - Ref: CMSFrontsBucket
                                       - "/*"
                 - PolicyName: table
                   PolicyDocument:
-                    Statement:
-                        Effect: Allow
-                        Action:
-                            - "dynamodb:BatchGetItem"
-                        Resource:
-                            - Fn::Join:
+                      Statement:
+                          Effect: Allow
+                          Action:
+                              - "dynamodb:BatchGetItem"
+                          Resource:
+                              - Fn::Join:
                                     - ""
                                     - - "arn:aws:dynamodb:"
                                       - Ref: AWS::Region
@@ -86,13 +93,15 @@ Resources:
             Code:
                 S3Bucket:
                     Ref: DeployBucket
-                S3Key: 'front-press-monitor/front-press-monitor.zip'
+                S3Key: !Sub
+                    - cms-fronts/${Stage}/front-press-monitor/front-press-monitor.zip
+                    - { Stage: !Ref Stage }
             Description: Monitor admin press
             Handler: index.handler
             MemorySize: 128
             Role:
                 "Fn::GetAtt": ["ExecutionRole", "Arn"]
-            Runtime: nodejs4.3
+            Runtime: nodejs14.x
             Timeout: 60
     EventSource:
         Type: AWS::Events::Rule
@@ -102,9 +111,9 @@ Resources:
             State: ENABLED
             Targets:
                 - Arn:
-                    Fn::GetAtt:
-                        - Lambda
-                        - Arn
+                      Fn::GetAtt:
+                          - Lambda
+                          - Arn
                   Id: Lambda
     LambdaPermission:
         Type: AWS::Lambda::Permission

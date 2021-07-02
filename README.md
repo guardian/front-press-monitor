@@ -9,13 +9,6 @@ This lambda periodically checks that fronts with different priorities are schedu
 
 ### Unit tests
 
-The lambda fetches secrets from an S3 bucket.
-
-Set the bucket name with
-
-```
-export FRONT_PRESSED_LAMBDA_BUCKET="bucket-name"
-```
-
-* `npm test` to run your tests once.
-* `nodemon --exec 'npm test' --ignore tmp` to watch your files and run tests on save.
+* `yarn build` to build the project. Necessary before testing.
+* `yarn test` to run your tests once.
+* `nodemon --exec 'yarn build && yarn test'` to watch your files and run tests on save.

@@ -1,6 +1,52 @@
 const tap = require('tap');
-const lambda = require('../tmp/lambda/index').default;
+const lambda = require('../dist/index').default;
 
+const jsonConfig = {
+	dynamo: {
+		CODE: {
+			tableName: 'table-XXXX',
+			errorsTableName: 'tableErrors-CODE'
+		},
+		PROD: {
+			tableName: 'table-XXXX',
+			errorsTableName: 'tableErrors-CODE'
+		}
+	},
+	AWS: {
+		region: 'eu-west-1',
+		roleToAssume: {
+			CODE: 'arn:aws:iam::XXX',
+			PROD: 'arn:aws:iam::XXX'
+		}
+	},
+	email: {
+		lambda: 'send-email-lambda-Lambda-XXX',
+		from: 'xxx@theguardian.com',
+		to: ['fronts-alerts@xxx.com']
+	},
+	facia: {
+		CODE: {
+			path: 'https://fronts.code.xxx.co.uk',
+			dynamo: 'table-XXX'
+		},
+		PROD: {
+			path: 'https://fronts.xxx.co.uk',
+			dynamo: 'table-XXX'
+		}
+	},
+	buckets: {
+		config: 'xxx/config/config.json',
+		cmsfronts: {
+			name: 'facia-tool-store'
+		},
+		frontend: {
+			name: 'aws-frontend-store'
+		}
+	},
+	pagerduty: {
+		key: 'pagerduty-XXX'
+	}
+};
 const collectionJson = {
 	fronts: {
 		one: {},
@@ -77,7 +123,7 @@ tap.test('fails if the config is not available', test => {
 		}
 	};
 
-	return lambda({cmsfronts, logger: silentLogger})
+	return lambda({cmsfronts, logger: silentLogger, jsonConfig})
 	.catch(error => {
 		test.type(error, Error);
 		test.match(error.message, /invalid config/i);
@@ -104,7 +150,7 @@ tap.test('fails if the pressed json are not available', test => {
 		}
 	};
 
-	return lambda({cmsfronts, frontend, logger: silentLogger})
+	return lambda({cmsfronts, frontend, logger: silentLogger, jsonConfig})
 	.catch(error => {
 		test.type(error, Error);
 		test.match(error.message, /invalid dynamo/i);
@@ -121,7 +167,7 @@ tap.test('does nothing when all fronts are pressed recently', test => {
 		}
 	};
 
-	return lambda({cmsfronts, frontend: frontendPressRecent, logger: silentLogger})
+	return lambda({cmsfronts, frontend: frontendPressRecent, logger: silentLogger, jsonConfig})
 	.then(result => {
 		test.deepEqual(result, {
 			checked: 4,
@@ -150,7 +196,7 @@ tap.test('alert if some fronts are stale', test => {
 		}
 	};
 
-	return lambda({cmsfronts, frontend: frontendPressStale, lambda: email, logger: silentLogger})
+	return lambda({cmsfronts, frontend: frontendPressStale, lambda: email, logger: silentLogger, jsonConfig})
 	.then(result => {
 		test.deepEqual(result, {
 			checked: 4,
@@ -178,7 +224,7 @@ tap.test('fails if email sending does not work', test => {
 		}
 	};
 
-	return lambda({cmsfronts, frontend: frontendPressStale, lambda: email, logger: silentLogger})
+	return lambda({cmsfronts, frontend: frontendPressStale, lambda: email, logger: silentLogger, jsonConfig})
 	.catch(error => {
 		test.type(error, Error);
 		test.match(error.message, /invalid email/i);
