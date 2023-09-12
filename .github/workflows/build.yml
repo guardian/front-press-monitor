@@ -40,4 +40,4 @@ jobs:
                   buildNumberOffset: 17 # This is the last build number from TeamCity
                   contentDirectories: |
                       front-press-monitor:
-                      - front-press-monitor.zip
+                      - dist/index.js
