@@ -36,7 +36,7 @@ jobs:
               uses: guardian/actions-riff-raff@v2
               with:
                   configPath: conf/riff-raff.yaml
-                  projectName: front-press-monitor
+                  projectName: cms-fronts::front-press-monitor
                   buildNumberOffset: 17 # This is the last build number from TeamCity
                   contentDirectories: |
                       front-press-monitor:
