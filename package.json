@@ -14,7 +14,6 @@
     "test": "tap test"
   },
   "devDependencies": {
-    "@guardian/node-riffraff-artifact": "^0.0.17",
     "@zeit/ncc": "^0.20.5",
     "aws-sdk": "^2.580.0",
     "tap": "^5.8.0",
