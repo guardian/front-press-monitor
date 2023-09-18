@@ -40,3 +40,5 @@ jobs:
                   contentDirectories: |
                       front-press-monitor:
                       - dist/front-press-monitor.zip
+                      cloudformation:
+                      - conf/cloudformation.yml
