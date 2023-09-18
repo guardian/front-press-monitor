@@ -10,3 +10,12 @@ deployments:
                 PROD:
                     name: front-press-monitor-Lambda-GY9Z0NCGNH9X
                     filename: front-press-monitor.zip
+    cloudformation:
+        type: cloud-formation
+        app: front-press-monitor
+        parameters:
+            cloudFormationStackName: front-press-monitor
+            cloudFormationStackByTags: false
+            appendStageToCloudFormationStackName: false
+            prependStackToCloudFormationStackName: false
+            templatePath: cloudformation.yml
