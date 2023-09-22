@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@zeit/ncc": "^0.20.5",
-    "aws-sdk": "^2.580.0",
+    "aws-sdk": "^2.814.0",
     "tap": "^5.8.0",
     "eslint": "^6.7.1"
   },
