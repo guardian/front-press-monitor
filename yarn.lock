@@ -1325,10 +1325,10 @@ commondir@^1.0.1:
   resolved "https://registry.yarnpkg.com/commondir/-/commondir-1.0.1.tgz#ddd800da0c66127393cca5950ea968a3aaf1253b"
   integrity sha1-3dgA2gxmEnOTzKWVDqloo6rxJTs=
 
-compare-dates@^1.1.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/compare-dates/-/compare-dates-1.2.0.tgz#f7ad7f6ddc4aaad24d3250715b7ae8ac9f888ba9"
-  integrity sha1-961/bdxKqtJNMlBxW3rorJ+Ii6k=
+compare-dates@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/compare-dates/-/compare-dates-2.0.0.tgz#cee61385d3750439a7eed8deee5211c06bfc4d87"
+  integrity sha512-Z2T5etolce/cTPgY0niqRBnd7aoYITn9HMqWFt5mOwKRx3SVp+C0uwsMdFsT0EFVJD8rZb6Z4B11X0Kw/voFAg==
 
 concat-map@0.0.1:
   version "0.0.1"
