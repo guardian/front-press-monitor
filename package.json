@@ -23,7 +23,6 @@
     "aws-sdk": "2.x"
   },
   "dependencies": {
-    "@babel/preset-env": "^7.23.2",
     "aws-s3-facia-tool": "^2.1.0",
     "compare-dates": "^2.0.0"
   }
