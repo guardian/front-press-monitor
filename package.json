@@ -16,14 +16,14 @@
   "devDependencies": {
     "@zeit/ncc": "^0.20.5",
     "aws-sdk": "^2.580.0",
-    "tap": "^5.8.0",
-    "eslint": "^6.7.1"
+    "eslint": "^6.7.1",
+    "tap": "^5.8.0"
   },
   "peerDependencies": {
     "aws-sdk": "2.x"
   },
   "dependencies": {
-    "@babel/preset-env": "^7.7.4",
+    "@babel/preset-env": "^7.23.2",
     "aws-s3-facia-tool": "^2.1.0",
     "compare-dates": "^1.1.0"
   }
