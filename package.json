@@ -16,7 +16,7 @@
   "devDependencies": {
     "@zeit/ncc": "^0.22.3",
     "aws-sdk": "^2.1479.0",
-    "eslint": "^6.7.1",
+    "eslint": "^8.52.0",
     "tap": "^5.8.0"
   },
   "peerDependencies": {
