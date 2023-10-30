@@ -14,17 +14,16 @@
     "test": "tap test"
   },
   "devDependencies": {
-    "@zeit/ncc": "^0.20.5",
-    "aws-sdk": "^2.580.0",
-    "tap": "^5.8.0",
-    "eslint": "^6.7.1"
+    "@zeit/ncc": "^0.22.3",
+    "aws-sdk": "^2.1479.0",
+    "eslint": "^8.52.0",
+    "tap": "^5.8.0"
   },
   "peerDependencies": {
     "aws-sdk": "2.x"
   },
   "dependencies": {
-    "@babel/preset-env": "^7.7.4",
     "aws-s3-facia-tool": "^2.1.0",
-    "compare-dates": "^1.1.0"
+    "compare-dates": "^2.0.0"
   }
 }
