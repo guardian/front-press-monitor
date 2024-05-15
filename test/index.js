@@ -169,7 +169,7 @@ tap.test('does nothing when all fronts are pressed recently', test => {
 
 	return lambda({cmsfronts, frontend: frontendPressRecent, logger: silentLogger, jsonConfig})
 	.then(result => {
-		test.deepEqual(result, {
+		test.same(result, {
 			checked: 4,
 			stale: 0
 		});
@@ -198,7 +198,7 @@ tap.test('alert if some fronts are stale', test => {
 
 	return lambda({cmsfronts, frontend: frontendPressStale, lambda: email, logger: silentLogger, jsonConfig})
 	.then(result => {
-		test.deepEqual(result, {
+		test.same(result, {
 			checked: 4,
 			stale: 2
 		});
