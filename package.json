@@ -11,13 +11,13 @@
     "build": "ncc build src/index.js -o dist -m -e aws-sdk",
     "postbuild": "cd dist && zip -r front-press-monitor.zip .",
     "lint": "eslint src/*.js test/*.js",
-    "test": "tap test"
+    "test": "tap --allow-incomplete-coverage test"
   },
   "devDependencies": {
     "@zeit/ncc": "^0.22.3",
     "aws-sdk": "^2.1479.0",
     "eslint": "^8.52.0",
-    "tap": "^5.8.0"
+    "tap": "^18.8.0"
   },
   "peerDependencies": {
     "aws-sdk": "2.x"
