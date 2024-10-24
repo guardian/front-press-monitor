@@ -101,7 +101,7 @@ Resources:
             MemorySize: 128
             Role:
                 "Fn::GetAtt": ["ExecutionRole", "Arn"]
-            Runtime: nodejs16.x
+            Runtime: nodejs20.x
             Timeout: 60
     EventSource:
         Type: AWS::Events::Rule
