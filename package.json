@@ -8,14 +8,13 @@
   "license": "Apache-2.0",
   "main": "src/index.js",
   "scripts": {
-    "build": "ncc build src/index.js -o dist -m -e aws-sdk",
+    "build": "ncc build src/index.js -o dist -m",
     "postbuild": "cd dist && zip -r front-press-monitor.zip .",
     "lint": "eslint src/*.js test/*.js",
     "test": "tap --allow-incomplete-coverage test"
   },
   "devDependencies": {
     "@vercel/ncc": "^0.38.2",
-    "aws-sdk": "^2.1479.0",
     "eslint": "^8.52.0",
     "tap": "^18.8.0"
   },
@@ -24,6 +23,7 @@
   },
   "dependencies": {
     "aws-s3-facia-tool": "^2.1.0",
-    "compare-dates": "^2.0.0"
+    "compare-dates": "^2.0.0",
+    "aws-sdk": "^2.1479.0"
   }
 }
